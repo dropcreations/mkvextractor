@@ -23,12 +23,12 @@ You can download and install MKVToolNix from [this](https://www.fosshub.com/MKVT
 - Open **Terminal** and type below command.
 - You can add one mkv file or more mkv files at once.
 
-`python mkvextractor.py [mkv_file_1] [mkv_file_2].......`
+**`python mkvextractor.py [mkv_file_1] [mkv_file_2] [mkv_file_3].......`**
 
 - You can also add a folder that includes mkv files.
 - Don't add more than one folder.
 
-`python mkvextractor.py [folder_path]`
+**`python mkvextractor.py [folder_path]`**
 
 ### **NOTE**
 - This is completely tested on **Windows**.
