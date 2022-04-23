@@ -83,7 +83,19 @@ def list_attachments():
 
 def process_mkv_file():
     global extract_track_name
-    extract_track_name = str(id) + "_" + str(track_type) + "_" + str(language)
+    global track_type
+
+    if track_type == "video":
+        load_json_out()
+        pixel_dimensions = json_data.get('tracks')[int(i)].get('properties').get('pixel_dimensions')
+        extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_[" + str(pixel_dimensions) + "]_[" + str(language) + "]"
+    elif track_type == "audio":
+        load_json_out()
+        audio_channels = json_data.get('tracks')[int(i)].get('properties').get('audio_channels')
+        audio_sampling_frequency = json_data.get('tracks')[int(i)].get('properties').get('audio_sampling_frequency')
+        extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_[" + str(audio_channels) + "CH]_[" + str(audio_sampling_frequency / 1000) + "kHz]_[" + str(language) + "]"
+    elif track_type == "subtitles":
+        extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_[" + str(language) + "]"
 
     if "AVC" in codec_id:
         extract_track_name = extract_track_name + ".h264"
@@ -434,7 +446,7 @@ def process_dir_all_tracks_timestamps():
         extract_track_command = []
         for i in range(track_count):
             load_json_data()
-            extract_track_name = str(id) + "_" + str(track_type) + "_tc.txt"
+            extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
             extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
             extract_track_command.append(extract_track_param)
             extract_param_option = ' '.join(extract_track_command)
@@ -462,7 +474,7 @@ def extract_all_tracks_timestamps():
                 extract_track_command = []
                 for i in range(track_count):
                     load_json_data()
-                    extract_track_name = str(id) + "_" + str(track_type) + "_tc.txt"
+                    extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
                     extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
@@ -490,7 +502,7 @@ def process_dir_single_tracks_timestamps():
         extract_track_command = []
         for i in track_in_list:
             load_json_data()                
-            extract_track_name = str(id) + "_" + str(track_type) + "_tc.txt"
+            extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
             extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
             extract_track_command.append(extract_track_param)
             extract_param_option = ' '.join(extract_track_command)
@@ -519,7 +531,7 @@ def extract_single_track_timestamps():
                 track_in_list = track_in.split(", ")
                 for i in track_in_list:
                     load_json_data()
-                    extract_track_name = str(id) + "_" + str(track_type) + "_tc.txt"
+                    extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
                     extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
@@ -546,7 +558,7 @@ def process_dir_all_tracks_cue():
         extract_track_command = []
         for i in range(track_count):
             load_json_data()
-            extract_track_name = str(id) + "_" + str(track_type) + "_cues.txt"
+            extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
             extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
             extract_track_command.append(extract_track_param)
             extract_param_option = ' '.join(extract_track_command)
@@ -574,7 +586,7 @@ def extract_all_tracks_cue():
                 extract_track_command = []
                 for i in range(track_count):
                     load_json_data()
-                    extract_track_name = str(id) + "_" + str(track_type) + "_cues.txt"
+                    extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
                     extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
@@ -602,7 +614,7 @@ def process_dir_single_tracks_cue():
         extract_track_command = []
         for i in track_in_list:
             load_json_data()                
-            extract_track_name = str(id) + "_" + str(track_type) + "_cues.txt"
+            extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
             extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
             extract_track_command.append(extract_track_param)
             extract_param_option = ' '.join(extract_track_command)
@@ -632,7 +644,7 @@ def extract_single_track_cue():
                 track_in_list = track_in.split(", ")
                 for i in track_in_list:
                     load_json_data()
-                    extract_track_name = str(id) + "_" + str(track_type) + "_cues.txt"
+                    extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
                     extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
