@@ -172,7 +172,7 @@ def process_dir_all_tracks():
     for mkv_file in mkv_file_list:
         folder_name = os.path.dirname(os.path.abspath(mkv_file))
         file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name + "\\" + file_name)
+        extract_folder = os.path.join(folder_name, file_name)
         os.makedirs(extract_folder, exist_ok=True)
         load_json_out()            
         track_count = len(json_data['tracks'])
@@ -199,7 +199,7 @@ def extract_all_tracks():
                 mkv_file = sys.argv[int(mkv_file_id)]
                 folder, file = os.path.split(mkv_file)
                 file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name + "\\" + file_name)
+                extract_folder = os.path.join(folder_name, file_name)
                 mkv_file_list.append(mkv_file)
                 os.makedirs(extract_folder, exist_ok=True)
                 load_json_out()            
@@ -227,7 +227,7 @@ def process_dir_single_tracks():
     for mkv_file in mkv_file_list:
         folder_name = os.path.dirname(os.path.abspath(mkv_file))
         file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name + "\\" + file_name)
+        extract_folder = os.path.join(folder_name, file_name)
         os.makedirs(extract_folder, exist_ok=True)
         list_tracks()
         track_in = input("|--Enter Track ID: ")
@@ -256,7 +256,7 @@ def extract_single_track():
                 mkv_file = sys.argv[int(mkv_file_id)]
                 folder, file = os.path.split(mkv_file)
                 file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name + "\\" + file_name)
+                extract_folder = os.path.join(folder_name, file_name)
                 mkv_file_list.append(mkv_file)
                 os.makedirs(extract_folder, exist_ok=True)
                 extract_track_command = []
@@ -289,7 +289,7 @@ def process_dir_chapters():
         if len(json_data.get("chapters")) > 0:
             folder_name = os.path.dirname(os.path.abspath(mkv_file))
             file_name = mkv_file[0:len(mkv_file) - 4]
-            extract_folder = os.path.join(folder_name + "\\" + file_name)
+            extract_folder = os.path.join(folder_name, file_name)
             os.makedirs(extract_folder, exist_ok=True)
             if chapters_mode == 1:
                 extract_track_param = (f'"{str(extract_folder)}\Chapters.xml"')
@@ -318,7 +318,7 @@ def extract_chapters():
                 file_name = file[0:len(file) - 4]
                 load_json_out()
                 if len(json_data.get("chapters")) > 0:
-                    extract_folder = os.path.join(folder_name + "\\" + file_name)
+                    extract_folder = os.path.join(folder_name, file_name)
                     mkv_file_list.append(mkv_file)
                     os.makedirs(extract_folder, exist_ok=True)
                     if chapters_mode == 1:
@@ -350,7 +350,7 @@ def process_dir_attachments():
         if len(json_data.get("attachments")) > 0:
             folder_name = os.path.dirname(os.path.abspath(mkv_file))
             file_name = mkv_file[0:len(mkv_file) - 4]
-            extract_folder = os.path.join(folder_name + "\\" + file_name)
+            extract_folder = os.path.join(folder_name, file_name)
             os.makedirs(extract_folder, exist_ok=True)
             if attachments_mode == 1:
                 print(" ")
@@ -395,7 +395,7 @@ def extract_attachments():
                 file_name = file[0:len(file) - 4]
                 load_json_out()
                 if len(json_data.get("attachments")) > 0:
-                    extract_folder = os.path.join(folder_name + "\\" + file_name)
+                    extract_folder = os.path.join(folder_name, file_name)
                     mkv_file_list.append(mkv_file)
                     os.makedirs(extract_folder, exist_ok=True)
                     if attachments_mode == 1:
@@ -439,7 +439,7 @@ def process_dir_all_tracks_timestamps():
     for mkv_file in mkv_file_list:
         folder_name = os.path.dirname(os.path.abspath(mkv_file))
         file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name + "\\" + file_name)
+        extract_folder = os.path.join(folder_name, file_name)
         os.makedirs(extract_folder, exist_ok=True)
         load_json_out()            
         track_count = len(json_data['tracks'])
@@ -466,7 +466,7 @@ def extract_all_tracks_timestamps():
                 mkv_file = sys.argv[int(mkv_file_id)]
                 folder, file = os.path.split(mkv_file)
                 file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name + "\\" + file_name)
+                extract_folder = os.path.join(folder_name, file_name)
                 mkv_file_list.append(mkv_file)
                 os.makedirs(extract_folder, exist_ok=True)
                 load_json_out()            
@@ -494,7 +494,7 @@ def process_dir_single_tracks_timestamps():
     for mkv_file in mkv_file_list:
         folder_name = os.path.dirname(os.path.abspath(mkv_file))
         file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name + "\\" + file_name)
+        extract_folder = os.path.join(folder_name, file_name)
         os.makedirs(extract_folder, exist_ok=True)
         list_tracks()
         track_in = input("|--Enter Track ID: ")
@@ -522,7 +522,7 @@ def extract_single_track_timestamps():
                 mkv_file = sys.argv[int(mkv_file_id)]
                 folder, file = os.path.split(mkv_file)
                 file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name + "\\" + file_name)
+                extract_folder = os.path.join(folder_name, file_name)
                 mkv_file_list.append(mkv_file)
                 os.makedirs(extract_folder, exist_ok=True)
                 extract_track_command = []
@@ -551,7 +551,7 @@ def process_dir_all_tracks_cue():
     for mkv_file in mkv_file_list:
         folder_name = os.path.dirname(os.path.abspath(mkv_file))
         file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name + "\\" + file_name)
+        extract_folder = os.path.join(folder_name, file_name)
         os.makedirs(extract_folder, exist_ok=True)
         load_json_out()            
         track_count = len(json_data['tracks'])
@@ -578,7 +578,7 @@ def extract_all_tracks_cue():
                 mkv_file = sys.argv[int(mkv_file_id)]
                 folder, file = os.path.split(mkv_file)
                 file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name + "\\" + file_name)
+                extract_folder = os.path.join(folder_name, file_name)
                 mkv_file_list.append(mkv_file)
                 os.makedirs(extract_folder, exist_ok=True)
                 load_json_out()            
@@ -606,7 +606,7 @@ def process_dir_single_tracks_cue():
     for mkv_file in mkv_file_list:
         folder_name = os.path.dirname(os.path.abspath(mkv_file))
         file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name + "\\" + file_name)
+        extract_folder = os.path.join(folder_name, file_name)
         os.makedirs(extract_folder, exist_ok=True)
         list_tracks()
         track_in = input("|--Enter Track ID: ")
@@ -635,7 +635,7 @@ def extract_single_track_cue():
                 mkv_file = sys.argv[int(mkv_file_id)]
                 folder, file = os.path.split(mkv_file)
                 file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name + "\\" + file_name)
+                extract_folder = os.path.join(folder_name, file_name)
                 mkv_file_list.append(mkv_file)
                 os.makedirs(extract_folder, exist_ok=True)
                 extract_track_command = []
@@ -664,7 +664,7 @@ def process_dir_cue_sheet():
     for mkv_file in mkv_file_list:
         folder_name = os.path.dirname(os.path.abspath(mkv_file))
         file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name + "\\" + file_name)
+        extract_folder = os.path.join(folder_name, file_name)
         os.makedirs(extract_folder, exist_ok=True)
         extract_track_param = (f'"{str(extract_folder)}\cue_sheet.cue"')
         command = (f'mkvextract "{os.path.abspath(mkv_file)}" cuesheet {extract_track_param}')
@@ -682,7 +682,7 @@ def extract_cue_sheet():
                 mkv_file = sys.argv[int(mkv_file_id)]
                 folder, file = os.path.split(mkv_file)
                 file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name + "\\" + file_name)
+                extract_folder = os.path.join(folder_name, file_name)
                 mkv_file_list.append(mkv_file)
                 os.makedirs(extract_folder, exist_ok=True)
                 extract_track_param = (f'"{str(extract_folder)}\cue_sheet.cue"')
@@ -703,7 +703,7 @@ def process_dir_tags():
         if len(json_data.get("global_tags")) or len(json_data.get("track_tags")) > 0:
             folder_name = os.path.dirname(os.path.abspath(mkv_file))
             file_name = mkv_file[0:len(mkv_file) - 4]
-            extract_folder = os.path.join(folder_name + "\\" + file_name)
+            extract_folder = os.path.join(folder_name, file_name)
             os.makedirs(extract_folder, exist_ok=True)
             extract_track_param = (f'"{str(extract_folder)}\Tags.xml"')
             command = (f'mkvextract "{os.path.abspath(mkv_file)}" tags {extract_track_param}')
@@ -729,7 +729,7 @@ def extract_tags():
                 file_name = file[0:len(file) - 4]
                 load_json_out()
                 if len(json_data.get("global_tags")) or len(json_data.get("track_tags")) > 0:
-                    extract_folder = os.path.join(folder_name + "\\" + file_name)
+                    extract_folder = os.path.join(folder_name, file_name)
                     mkv_file_list.append(mkv_file)
                     os.makedirs(extract_folder, exist_ok=True)
                     extract_track_param = (f'"{str(extract_folder)}\Tags.xml"')
