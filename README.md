@@ -29,6 +29,3 @@ You can download and install MKVToolNix from [this](https://www.fosshub.com/MKVT
 - Don't add more than one folder.
 
 **`python mkvextractor.py [folder_path]`**
-
-### **NOTE**
-- This is completely tested on **Windows**.
