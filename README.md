@@ -16,6 +16,10 @@ You can download and install MKVToolNix from [this](https://www.fosshub.com/MKVT
 - Then select **"Path"** row in **'System variables'** section and hit **"Edit"**
 - Click on **"New"** button and add your **installed MKVToolNix path** to it. (Usually it is **"C:\Program Files\MKVToolNix"**)
 
+## **Set path to mkvextract [in Linux]**
+
+- See [here](https://mkvtoolnix.download/downloads.html) for the mkvextract installation.
+- See [here](https://opensource.com/article/17/6/set-path-linux) for set paths
 
 ## **Usage**
 
