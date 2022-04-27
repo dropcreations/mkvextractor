@@ -180,11 +180,13 @@ def process_dir_all_tracks():
         for i in range(track_count):
             load_json_data()                
             process_mkv_file()
-            extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+            join_param = os.path.join(extract_folder, extract_track_name)
+            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
             extract_track_command.append(extract_track_param)
             extract_param_option = ' '.join(extract_track_command)
         command = (f'mkvextract "{os.path.abspath(mkv_file)}" tracks {extract_param_option}')
-        os.system('cmd /c "'+ str(command) +'"')
+        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print(process.stdout.decode())
         print(" ")
 
 def extract_all_tracks():
@@ -208,11 +210,13 @@ def extract_all_tracks():
                 for i in range(track_count):
                     load_json_data()
                     process_mkv_file()
-                    extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+                    join_param = os.path.join(extract_folder, extract_track_name)
+                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
                 command = (f'mkvextract "{os.path.abspath(mkv_file)}" tracks {extract_param_option}')
-                os.system('cmd /c "'+ str(command) +'"')
+                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                print(process.stdout.decode())
                 print(" ")
     else:
         print("Add mkv file path or folder path")
@@ -235,13 +239,15 @@ def process_dir_single_tracks():
         track_in_list = track_in.split(", ")
         extract_track_command = []
         for i in track_in_list:
-            load_json_data()                
+            load_json_data()
             process_mkv_file()
-            extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+            join_param = os.path.join(extract_folder, extract_track_name)
+            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
             extract_track_command.append(extract_track_param)
             extract_param_option = ' '.join(extract_track_command)
         command = (f'mkvextract "{os.path.abspath(mkv_file)}" tracks {extract_param_option}')
-        os.system('cmd /c "'+ str(command) +'"')
+        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print(process.stdout.decode())
         print(" ")
 
 def extract_single_track():
@@ -267,11 +273,13 @@ def extract_single_track():
                 for i in track_in_list:
                     load_json_data()
                     process_mkv_file()
-                    extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+                    join_param = os.path.join(extract_folder, extract_track_name)
+                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
                 command = (f'mkvextract "{os.path.abspath(mkv_file)}" tracks {extract_param_option}')
-                os.system('cmd /c "'+ str(command) +'"')
+                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                print(process.stdout.decode())
                 print(" ")
     else:
         print("Add mkv file path or folder path")
@@ -292,12 +300,15 @@ def process_dir_chapters():
             extract_folder = os.path.join(folder_name, file_name)
             os.makedirs(extract_folder, exist_ok=True)
             if chapters_mode == 1:
-                extract_track_param = (f'"{str(extract_folder)}\Chapters.xml"')
+                join_param = os.path.join(extract_folder, "Chapters.xml")
+                extract_track_param = (f'"{str(join_param)}"')
                 command = (f'mkvextract "{os.path.abspath(mkv_file)}" chapters {extract_track_param}')
             elif chapters_mode == 2:
-                extract_track_param = (f'"{str(extract_folder)}\Chapters_OGM.txt"')
+                join_param = os.path.join(extract_folder, "Chapters_OGM.txt")
+                extract_track_param = (f'"{str(join_param)}"')
                 command = (f'mkvextract "{os.path.abspath(mkv_file)}" chapters --simple {extract_track_param}')
-            os.system('cmd /c "'+ str(command) +'"')
+            process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            print(process.stdout.decode())
             print("Chapters Saved.")
             print(" ")
         elif len(json_data.get("chapters")) == 0:
@@ -322,12 +333,15 @@ def extract_chapters():
                     mkv_file_list.append(mkv_file)
                     os.makedirs(extract_folder, exist_ok=True)
                     if chapters_mode == 1:
-                        extract_track_param = (f'"{str(extract_folder)}\Chapters.xml"')
+                        join_param = os.path.join(extract_folder, "Chapters.xml")
+                        extract_track_param = (f'"{str(join_param)}"')
                         command = (f'mkvextract "{os.path.abspath(mkv_file)}" chapters {extract_track_param}')
                     elif chapters_mode == 2:
-                        extract_track_param = (f'"{str(extract_folder)}\Chapters_OGM.txt"')
+                        join_param = os.path.join(extract_folder, "Chapters_OGM.txt")
+                        extract_track_param = (f'"{str(join_param)}"')
                         command = (f'mkvextract "{os.path.abspath(mkv_file)}" chapters --simple {extract_track_param}')
-                    os.system('cmd /c "'+ str(command) +'"')
+                    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                    print(process.stdout.decode())
                     print("Chapters Saved.")
                     print(" ")
                 elif len(json_data.get("chapters")) == 0:
@@ -358,11 +372,13 @@ def process_dir_attachments():
                 extract_track_command = []
                 for i in range(attachment_count):
                     load_json_data_attachments()
-                    extract_track_param = (f'{str(attachments_id)}:"{str(extract_folder)}\{str(attachments_file_name)}"')
+                    join_param = os.path.join(extract_folder, attachments_file_name)
+                    extract_track_param = (f'{str(attachments_id)}:"{str(join_param)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
                     command = (f'mkvextract "{os.path.abspath(mkv_file)}" attachments {extract_param_option}')
-                os.system('cmd /c "'+ str(command) +'"')
+                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                print(process.stdout.decode())
                 print("Attachments Saved.")
             elif attachments_mode == 2:
                 list_attachments()
@@ -370,9 +386,11 @@ def process_dir_attachments():
                 print(" ")
                 i = int(choose_attach_id) - 1
                 attachments_file_name = json_data.get('attachments')[int(i)].get('file_name')
-                extract_track_param = (f'{str(choose_attach_id)}:"{str(extract_folder)}\{str(attachments_file_name)}"')
+                join_param = os.path.join(extract_folder, attachments_file_name)
+                extract_track_param = (f'{str(choose_attach_id)}:"{str(join_param)}"')
                 command = (f'mkvextract "{os.path.abspath(mkv_file)}" attachments {extract_track_param}')
-                os.system('cmd /c "'+ str(command) +'"')
+                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                print(process.stdout.decode())
                 print("Attachments Saved.")
                 print(" ")
         elif len(json_data.get("attachments")) == 0:
@@ -404,11 +422,13 @@ def extract_attachments():
                         extract_track_command = []
                         for i in range(attachment_count):
                             load_json_data_attachments()
-                            extract_track_param = (f'{str(attachments_id)}:"{str(extract_folder)}\{str(attachments_file_name)}"')
+                            join_param = os.path.join(extract_folder, attachments_file_name)
+                            extract_track_param = (f'{str(attachments_id)}:"{str(join_param)}"')
                             extract_track_command.append(extract_track_param)
                             extract_param_option = ' '.join(extract_track_command)
                             command = (f'mkvextract "{os.path.abspath(mkv_file)}" attachments {extract_param_option}')
-                        os.system('cmd /c "'+ str(command) +'"')
+                        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                        print(process.stdout.decode())
                         print("Attachments Saved.")
                     elif attachments_mode == 2:
                         list_attachments()
@@ -416,9 +436,11 @@ def extract_attachments():
                         print(" ")
                         i = int(choose_attach_id) - 1
                         attachments_file_name = json_data.get('attachments')[int(i)].get('file_name')
-                        extract_track_param = (f'{str(choose_attach_id)}:"{str(extract_folder)}\{str(attachments_file_name)}"')
+                        join_param = os.path.join(extract_folder, attachments_file_name)
+                        extract_track_param = (f'{str(choose_attach_id)}:"{str(join_param)}"')
                         command = (f'mkvextract "{os.path.abspath(mkv_file)}" attachments {extract_track_param}')
-                        os.system('cmd /c "'+ str(command) +'"')
+                        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                        print(process.stdout.decode())
                         print("Attachments Saved.")
                         print(" ")
                 elif len(json_data.get("attachments")) == 0:
@@ -447,12 +469,14 @@ def process_dir_all_tracks_timestamps():
         for i in range(track_count):
             load_json_data()
             extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
-            extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+            join_param = os.path.join(extract_folder, extract_track_name)
+            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
             extract_track_command.append(extract_track_param)
             extract_param_option = ' '.join(extract_track_command)
         command = (f'mkvextract "{os.path.abspath(mkv_file)}" timecodes_v2 {extract_param_option}')
         print(" ")
-        os.system('cmd /c "'+ str(command) +'"')
+        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print(process.stdout.decode())
 
 def extract_all_tracks_timestamps():
     global i
@@ -475,12 +499,14 @@ def extract_all_tracks_timestamps():
                 for i in range(track_count):
                     load_json_data()
                     extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
-                    extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+                    join_param = os.path.join(extract_folder, extract_track_name)
+                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
                 command = (f'mkvextract "{os.path.abspath(mkv_file)}" timecodes_v2 {extract_param_option}')
                 print(" ")
-                os.system('cmd /c "'+ str(command) +'"')
+                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                print(process.stdout.decode())
     else:
         print("Add mkv file path or folder path")
 
@@ -503,12 +529,14 @@ def process_dir_single_tracks_timestamps():
         for i in track_in_list:
             load_json_data()                
             extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
-            extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+            join_param = os.path.join(extract_folder, extract_track_name)
+            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
             extract_track_command.append(extract_track_param)
             extract_param_option = ' '.join(extract_track_command)
         command = (f'mkvextract "{os.path.abspath(mkv_file)}" timecodes_v2 {extract_param_option}')
         print(" ")
-        os.system('cmd /c "'+ str(command) +'"')
+        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print(process.stdout.decode())
 
 def extract_single_track_timestamps():
     global i
@@ -532,12 +560,14 @@ def extract_single_track_timestamps():
                 for i in track_in_list:
                     load_json_data()
                     extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
-                    extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+                    join_param = os.path.join(extract_folder, extract_track_name)
+                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
                 command = (f'mkvextract "{os.path.abspath(mkv_file)}" timecodes_v2 {extract_param_option}')
                 print(" ")
-                os.system('cmd /c "'+ str(command) +'"')
+                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                print(process.stdout.decode())
 
 def process_dir_all_tracks_cue():
     global i
@@ -559,12 +589,14 @@ def process_dir_all_tracks_cue():
         for i in range(track_count):
             load_json_data()
             extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
-            extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+            join_param = os.path.join(extract_folder, extract_track_name)
+            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
             extract_track_command.append(extract_track_param)
             extract_param_option = ' '.join(extract_track_command)
         command = (f'mkvextract "{os.path.abspath(mkv_file)}" cues {extract_param_option}')
         print(" ")
-        os.system('cmd /c "'+ str(command) +'"')
+        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print(process.stdout.decode())
 
 def extract_all_tracks_cue():
     global i
@@ -587,12 +619,14 @@ def extract_all_tracks_cue():
                 for i in range(track_count):
                     load_json_data()
                     extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
-                    extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+                    join_param = os.path.join(extract_folder, extract_track_name)
+                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
                 command = (f'mkvextract "{os.path.abspath(mkv_file)}" cues {extract_param_option}')
                 print(" ")
-                os.system('cmd /c "'+ str(command) +'"')
+                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                print(process.stdout.decode())
     else:
         print("Add mkv file path or folder path")
 
@@ -615,12 +649,14 @@ def process_dir_single_tracks_cue():
         for i in track_in_list:
             load_json_data()                
             extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
-            extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+            join_param = os.path.join(extract_folder, extract_track_name)
+            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
             extract_track_command.append(extract_track_param)
             extract_param_option = ' '.join(extract_track_command)
         command = (f'mkvextract "{os.path.abspath(mkv_file)}" cues {extract_param_option}')
         print(" ")
-        os.system('cmd /c "'+ str(command) +'"')
+        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print(process.stdout.decode())
         print(" ")
 
 def extract_single_track_cue():
@@ -645,12 +681,14 @@ def extract_single_track_cue():
                 for i in track_in_list:
                     load_json_data()
                     extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
-                    extract_track_param = (f'{str(id)}:"{str(extract_folder)}\{str(extract_track_name)}"')
+                    join_param = os.path.join(extract_folder, extract_track_name)
+                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
                     extract_track_command.append(extract_track_param)
                     extract_param_option = ' '.join(extract_track_command)
                 command = (f'mkvextract "{os.path.abspath(mkv_file)}" cues {extract_param_option}')
                 print(" ")
-                os.system('cmd /c "'+ str(command) +'"')
+                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                print(process.stdout.decode())
                 print(" ")
 
 def process_dir_cue_sheet():
@@ -666,9 +704,11 @@ def process_dir_cue_sheet():
         file_name = mkv_file[0:len(mkv_file) - 4]
         extract_folder = os.path.join(folder_name, file_name)
         os.makedirs(extract_folder, exist_ok=True)
-        extract_track_param = (f'"{str(extract_folder)}\cue_sheet.cue"')
+        join_param = os.path.join(extract_folder, "cue_sheet.cue")
+        extract_track_param = (f'"{str(join_param)}"')
         command = (f'mkvextract "{os.path.abspath(mkv_file)}" cuesheet {extract_track_param}')
-        os.system('cmd /c "'+ str(command) +'"')
+        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print(process.stdout.decode())
 
 def extract_cue_sheet():
     global i
@@ -685,9 +725,11 @@ def extract_cue_sheet():
                 extract_folder = os.path.join(folder_name, file_name)
                 mkv_file_list.append(mkv_file)
                 os.makedirs(extract_folder, exist_ok=True)
-                extract_track_param = (f'"{str(extract_folder)}\cue_sheet.cue"')
+                join_param = os.path.join(extract_folder, "cue_sheet.cue")
+                extract_track_param = (f'"{str(join_param)}"')
                 command = (f'mkvextract "{os.path.abspath(mkv_file)}" cuesheet {extract_track_param}')
-                os.system('cmd /c "'+ str(command) +'"')
+                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                print(process.stdout.decode())
     else:
         print("Add mkv file path or folder path")
 
@@ -705,9 +747,11 @@ def process_dir_tags():
             file_name = mkv_file[0:len(mkv_file) - 4]
             extract_folder = os.path.join(folder_name, file_name)
             os.makedirs(extract_folder, exist_ok=True)
-            extract_track_param = (f'"{str(extract_folder)}\Tags.xml"')
+            join_param = os.path.join(extract_folder, "Tags.xml")
+            extract_track_param = (f'"{str(join_param)}"')
             command = (f'mkvextract "{os.path.abspath(mkv_file)}" tags {extract_track_param}')
-            os.system('cmd /c "'+ str(command) +'"')
+            process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            print(process.stdout.decode())
             print(" ")
             print("Tags Saved.")
         elif len(json_data.get("global_tags")) == 0:
@@ -732,9 +776,11 @@ def extract_tags():
                     extract_folder = os.path.join(folder_name, file_name)
                     mkv_file_list.append(mkv_file)
                     os.makedirs(extract_folder, exist_ok=True)
-                    extract_track_param = (f'"{str(extract_folder)}\Tags.xml"')
+                    join_param = os.path.join(extract_folder, "Tags.xml")
+                    extract_track_param = (f'"{str(join_param)}"')
                     command = (f'mkvextract "{os.path.abspath(mkv_file)}" tags {extract_track_param}')
-                    os.system('cmd /c "'+ str(command) +'"')
+                    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                    print(process.stdout.decode())
                     print(" ")
                     print("Tags Saved.")
                 elif len(json_data.get("global_tags")) == 0:
