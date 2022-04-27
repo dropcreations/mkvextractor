@@ -8,7 +8,7 @@ To use this python script you have to install MKVToolNix and add mkvextract path
 
 You can download and install MKVToolNix from [this](https://www.fosshub.com/MKVToolNix.html) link.
 
-## **Set path to mkvextract**
+## **Set path to mkvextract [in Windows]**
 
 - Right click on **"This PC"** and select **"Properties"**
 - Now click on **"Advanced system settings"**
@@ -29,7 +29,3 @@ You can download and install MKVToolNix from [this](https://www.fosshub.com/MKVT
 - Don't add more than one folder.
 
 **`python mkvextractor.py [folder_path]`**
-
-## **Note**
-
-- This is tested on **Windows only**.
