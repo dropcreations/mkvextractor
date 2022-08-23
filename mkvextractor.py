@@ -1,845 +1,387 @@
 import os
 import sys
-import subprocess
 import json
+import subprocess
 
-input_count = len(sys.argv)
-mkv_file_list = []
+inputCount = len(sys.argv)
 
-def load_json_out():
-    global json_data
-    mkvmerge_json_out = subprocess.check_output([
-        'mkvmerge',
-        '--identify',
-        '--identification-format',
-        'json',
-        os.path.abspath(mkv_file),
-        ], stderr=subprocess.DEVNULL)
-    json_data = json.loads(mkvmerge_json_out)
+mkvList = []
+webmList = []
 
-def load_json_data():
-    global id
-    global codec_id
-    global language
-    global language_ietf
-    global title
-    global codec
-    global track_type
-    global json_data
+#process all inputs and get 'mkv' and 'webm' files.
 
-    load_json_out()
-    id = json_data.get('tracks')[int(i)].get('id')
-    language = json_data.get('tracks')[int(i)].get('properties').get('language')
-    language_ietf = json_data.get('tracks')[int(i)].get('properties').get('language_ietf')
-    title = json_data.get('tracks')[int(i)].get('properties').get('track_name')
-    codec_id = json_data.get('tracks')[int(i)].get('properties').get('codec_id')
-    codec = json_data.get('tracks')[int(i)].get('codec')
-    track_type = json_data.get('tracks')[int(i)].get('type')
+def inputProcess():
+    if inputCount == 2:
+        if os.path.isfile(sys.argv[1]) is False:
+            for inputFile in os.listdir(sys.argv[1]):
+                if os.path.splitext(inputFile)[1] == '.mkv':
+                    mkvList.append(inputFile)
+                elif os.path.splitext(inputFile)[1] == '.webm':
+                    webmList.append(inputFile)
+        else:
+            mkvList.append(sys.argv[1])
+    elif inputCount > 2:
+        for inputID in range(1, inputCount):
+            if os.path.splitext(sys.argv[inputID])[1] == '.mkv':
+                mkvList.append(sys.argv[inputID])
+            elif os.path.splitext(sys.argv[inputID])[1] == '.webm':
+                webmList.append(sys.argv[inputID])
+    else:
+        print(f'Please provide inputs...')
 
-def load_json_data_attachments():
-    global attachments_id
-    global attachments_content_type
-    global attachments_description
-    global attachments_file_name
-    global attachments_uid
+#get stream information in json format.
 
-    load_json_out()
-    attachments_id = json_data.get('attachments')[int(i)].get('id')
-    attachments_content_type = json_data.get('attachments')[int(i)].get('content_type')
-    attachments_description = json_data.get('attachments')[int(i)].get('description')
-    attachments_file_name = json_data.get('attachments')[int(i)].get('file_name')
-    attachments_uid = json_data.get('attachments')[int(i)].get('properties').get('uid')
+def get_output(mediaFile):
+    global jsonData
+    mkvmerge_JSON = subprocess.check_output(
+        [
+            'mkvmerge',
+            '--identify',
+            '--identification-format',
+            'json',
+            os.path.abspath(mediaFile),
+        ],
+        stderr=subprocess.DEVNULL
+    )
+    jsonData = json.loads(mkvmerge_JSON)
 
-def list_tracks():
+#parse data from json output
+
+def get_tracks(mediaFile):
+    get_output(mediaFile)
+    global id; id = jsonData.get('tracks')[int(i)].get('id')
+    global language; language = jsonData.get('tracks')[int(i)].get('properties').get('language')
+    global language_ietf; language_ietf = jsonData.get('tracks')[int(i)].get('properties').get('language_ietf')
+    global title; title = jsonData.get('tracks')[int(i)].get('properties').get('track_name')
+    global codec_id; codec_id = jsonData.get('tracks')[int(i)].get('properties').get('codec_id')
+    global codec; codec = jsonData.get('tracks')[int(i)].get('codec')
+    global track_type; track_type = jsonData.get('tracks')[int(i)].get('type')
+
+def get_attachments(mediaFile):
+    get_output(mediaFile)
+    global attach_id; attach_id = jsonData.get('attachments')[int(i)].get('id')
+    global attach_type; attach_type = jsonData.get('attachments')[int(i)].get('content_type')
+    global attach_desc; attach_desc = jsonData.get('attachments')[int(i)].get('description')
+    global attach_name; attach_name = jsonData.get('attachments')[int(i)].get('file_name')
+    global attach_uid; attach_uid = jsonData.get('attachments')[int(i)].get('properties').get('uid')
+
+#List available tracks
+
+def viewTracks(mediaFile):
     global i
-    load_json_out()
-    track_count = len(json_data['tracks'])
-    for i in range(track_count):
-        load_json_data()
-        print("|")
-        print("|--Track ID : " + str(id))
-        print("|")
-        print("|--Type : " + str(track_type))
-        print("|--Codec : " + str(codec))
-        print("|--Language : " + str(language))
-        print("|--Language_ietf : " + str(language_ietf))
-        print("|--Title : " + str(title))
-    print("|")
+    get_output(mediaFile)
+    trackCount = len(jsonData['tracks'])
+    print(os.path.basename(mediaFile))
+    for i in range(trackCount):
+        get_tracks(mediaFile)
+        print(f'\nTrack ID : {id}')
+        print(f'  |')
+        print(f'  |--Type           : {track_type}')
+        print(f'  |--Codec          : {codec}')
+        print(f'  |--Language       : {language}')
+        print(f'  |--Language_ietf  : {language_ietf}')
+        print(f'  |--Title          : {title}')
 
-def list_attachments():
+#List available attachments
+
+def viewAttachments(mediaFile):
     global i
-    load_json_out()
-    attachment_count = len(json_data['attachments'])
-    print("|")
-    for i in range(attachment_count):
-        load_json_data_attachments()
-        print("|--Attachment ID : " + str(attachments_id))
-        print("|")
-        print("|--ContentType : " + str(attachments_content_type))
-        print("|--Filename : " + str(attachments_file_name))
-        print("|--Description : " + str(attachments_description))
-        print("|--UID : " + str(attachments_uid))
-        print("|")
+    get_output(mediaFile)
+    attachmentCount = len(jsonData['attachments'])
+    print(os.path.basename(mediaFile))
+    for i in range(attachmentCount):
+        get_attachments(mediaFile)
+        print(f'\nAttachment ID : {attach_id}')
+        print(f'  |')
+        print(f'  |--ContentType    : {attach_type}')
+        print(f'  |--Filename       : {attach_name}')
+        print(f'  |--Description    : {attach_desc}')
+        print(f'  |--UID            : {attach_uid}')
 
-def process_mkv_file():
-    global extract_track_name
-    global track_type
+#process the input file
 
-    if track_type == "video":
-        load_json_out()
-        pixel_dimensions = json_data.get('tracks')[int(i)].get('properties').get('pixel_dimensions')
-        extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_[" + str(pixel_dimensions) + "]_[" + str(language) + "]"
-    elif track_type == "audio":
-        load_json_out()
-        audio_channels = json_data.get('tracks')[int(i)].get('properties').get('audio_channels')
-        audio_sampling_frequency = json_data.get('tracks')[int(i)].get('properties').get('audio_sampling_frequency')
-        extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_[" + str(audio_channels) + "CH]_[" + str(audio_sampling_frequency / 1000) + "kHz]_[" + str(language) + "]"
+def processFile(mediaFile):
+    global extractName
+
+    if track_type == 'video':
+        get_output(mediaFile)
+        pixel_dimensions = jsonData.get('tracks')[int(i)].get('properties').get('pixel_dimensions')
+        extractName = f'TrackID_{id}_[{track_type}]_[{pixel_dimensions}]_[{language}]'
+    elif track_type == 'audio':
+        get_output(mediaFile)
+        audio_channels = jsonData.get('tracks')[int(i)].get('properties').get('audio_channels')
+        audio_sampling_frequency = jsonData.get('tracks')[int(i)].get('properties').get('audio_sampling_frequency')
+        extractName = f'TrackID_{id}_[{track_type}]_[{audio_channels}CH]_[{audio_sampling_frequency / 1000}kHz]_[{language}]'
     elif track_type == "subtitles":
-        extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_[" + str(language) + "]"
-
+        extractName = f'TrackID_{id}_[{track_type}]_[{language}]'
+    
     if "AVC" in codec_id:
-        extract_track_name = extract_track_name + ".h264"
+        extractName = extractName + ".264"
     elif "HEVC" in codec_id:
-        extract_track_name = extract_track_name + ".h265"
-    elif "V_VP8" in codec_id or "V_VP9" in codec_id:
-        extract_track_name = extract_track_name + ".ivf"
+        extractName = extractName + ".hevc"
+    elif "V_VP8" in codec_id:
+        extractName = extractName + ".ivf"
+    elif "V_VP9" in codec_id:
+        extractName = extractName + ".ivf"
     elif "V_AV1" in codec_id:
-        extract_track_name = extract_track_name + ".ivf"
-    elif "V_MPEG1" in codec_id or "V_MPEG2" in codec_id:
-        extract_track_name = extract_track_name + ".mpg"
+        extractName = extractName + ".ivf"
+    elif "V_MPEG1" in codec_id:
+        extractName = extractName + ".mpg"
+    elif "V_MPEG2" in codec_id:
+        extractName = extractName + ".mpg"
     elif "V_REAL" in codec_id:
-        extract_track_name = extract_track_name + ".rm"
+        extractName = extractName + ".rm"
     elif "V_THEORA" in codec_id:
-        extract_track_name = extract_track_name + ".ogg"
+        extractName = extractName + ".ogg"
     elif "V_MS/VFW/FOURCC" in codec_id:
-        extract_track_name = extract_track_name + ".avi"
+        extractName = extractName + ".avi"
     elif "AAC" in codec_id:
-        extract_track_name = extract_track_name + ".aac"
+        extractName = extractName + ".aac"
     elif "A_AC3" in codec_id:
-        extract_track_name = extract_track_name + ".ac3"
+        extractName = extractName + ".ac3"
     elif "A_EAC3" in codec_id:
-        extract_track_name = extract_track_name + ".eac3"
+        extractName = extractName + ".eac3"
     elif "ALAC" in codec_id:
-        extract_track_name = extract_track_name + ".caf"
+        extractName = extractName + ".caf"
     elif "DTS" in codec_id:
-        extract_track_name = extract_track_name + ".dts"
+        extractName = extractName + ".dts"
     elif "FLAC" in codec_id:
-        extract_track_name = extract_track_name + ".flac"
+        extractName = extractName + ".flac"
     elif "MPEG/L2" in codec_id:
-        extract_track_name = extract_track_name + ".mp2"
+        extractName = extractName + ".mp2"
     elif "MPEG/L3" in codec_id:
-        extract_track_name = extract_track_name + ".mp3"
+        extractName = extractName + ".mp3"
     elif "OPUS" in codec_id:
-        extract_track_name = extract_track_name + ".ogg"
+        extractName = extractName + ".ogg"
     elif "PCM" in codec_id:
-        extract_track_name = extract_track_name + ".wav"
+        extractName = extractName + ".wav"
     elif "REAL" in codec_id:
-        extract_track_name = extract_track_name + ".ra"
+        extractName = extractName + ".ra"
     elif "TRUEHD" in codec_id:
-        extract_track_name = extract_track_name + ".thd"
+        extractName = extractName + ".thd"
     elif "MLP" in codec_id:
-        extract_track_name = extract_track_name + ".mlp"
+        extractName = extractName + ".mlp"
     elif "TTA1" in codec_id:
-        extract_track_name = extract_track_name + ".tta"
+        extractName = extractName + ".tta"
     elif "VORBIS" in codec_id:
-        extract_track_name = extract_track_name + ".ogg"
+        extractName = extractName + ".ogg"
     elif "WAVPACK4" in codec_id:
-        extract_track_name = extract_track_name + ".wv"
+        extractName = extractName + ".wv"
     elif "PGS" in codec_id:
-        extract_track_name = extract_track_name + ".sup"
+        extractName = extractName + ".sup"
     elif "ASS" in codec_id:
-        extract_track_name = extract_track_name + ".ass"
+        extractName = extractName + ".ass"
     elif "SSA" in codec_id:
-        extract_track_name = extract_track_name + ".ssa"
-    elif "UTF8" in codec_id or "ASCII" in codec_id:
-        extract_track_name = extract_track_name + ".srt"
+        extractName = extractName + ".ssa"
+    elif "UTF8" in codec_id:
+        extractName = extractName + ".srt"
+    elif "ASCII" in codec_id:
+        extractName = extractName + ".srt"
     elif "VOBSUB" in codec_id:
-        extract_track_name = extract_track_name + ".sub"
+        extractName = extractName + ".sub"
     elif "S_KATE" in codec_id:
-        extract_track_name = extract_track_name + ".ogg"
+        extractName = extractName + ".ogg"
     elif "USF" in codec_id:
-        extract_track_name = extract_track_name + ".usf"
+        extractName = extractName + ".usf"
     elif "WEBVTT" in codec_id:
-        extract_track_name = extract_track_name + ".vtt"
+        extractName = extractName + ".vtt"
 
-def process_dir_all_tracks():
+#make the items extract folder
+
+def makeFolder(mediaFile):
+    mediaFolder = os.path.dirname(mediaFile)
+    mediaName = os.path.splitext(os.path.basename(mediaFile))[0]
+    global extractFolder; extractFolder = os.path.join(mediaFolder, mediaName)
+    os.makedirs(extractFolder, exist_ok=True)
+
+#run commands for extract all tracks available
+
+def runTracks(mediaFile):
     global i
-    global mkv_file
-    for mkv_file_in in os.listdir(sys.argv[1]):
-        if str(mkv_file_in[-3:]).lower() == "mkv":
-            mkv_file_list.append(mkv_file_in)
-    os.chdir(sys.argv[1])
-    for mkv_file in mkv_file_list:
-        folder_name = os.path.dirname(os.path.abspath(mkv_file))
-        file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name, file_name)
-        os.makedirs(extract_folder, exist_ok=True)
-        load_json_out()            
-        track_count = len(json_data['tracks'])
-        extract_track_command = []
-        for i in range(track_count):
-            load_json_data()                
-            process_mkv_file()
-            join_param = os.path.join(extract_folder, extract_track_name)
-            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-            extract_track_command.append(extract_track_param)
-            extract_param_option = ' '.join(extract_track_command)
-        command = (f'mkvextract "{os.path.abspath(mkv_file)}" tracks {extract_param_option}')
+    commandList = []
+    makeFolder(mediaFile)
+    get_output(mediaFile)
+    trackCount = len(jsonData['tracks'])
+    for i in range(trackCount):
+        get_tracks(mediaFile)
+        processFile(mediaFile)
+        extractPath = os.path.join(extractFolder, extractName)
+        extractParam = f'{id}:"{extractPath}"'
+        commandList.append(extractParam)
+    extractParam = ' '.join(commandList)
+    command = f'mkvextract "{mediaFile}" tracks {extractParam}'
+    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    print(process.stdout.decode())
+
+#run commands for extract a specific track(s)
+
+def runTrack(mediaFile):
+    global i
+    commandList = []
+    makeFolder(mediaFile)
+    viewTracks(mediaFile)
+    trackID = input(f'\ntrackID: ')
+    trackID = trackID.split(', ')
+    for i in trackID:
+        get_tracks(mediaFile)
+        processFile(mediaFile)
+        extractPath = os.path.join(extractFolder, extractName)
+        extractParam = f'{id}:"{extractPath}"'
+        commandList.append(extractParam)
+    extractParam = ' '.join(commandList)
+    command = f'mkvextract "{mediaFile}" tracks {extractParam}'
+    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    print('\n' + process.stdout.decode())
+
+#run commands for extract chapters
+
+def runChapters(mediaFile):
+    get_output(mediaFile)
+    if len(jsonData.get('chapters')) > 0:
+        makeFolder(mediaFile)
+        if chaptersMode == 1:
+            extractPath = os.path.join(extractFolder, 'Chapters_XML.xml')
+            command = f'mkvextract "{mediaFile}" chapters "{extractPath}"'
+        if chaptersMode == 2:
+            extractPath = os.path.join(extractFolder, 'Chapters_OGM.txt')
+            command = f'mkvextract "{mediaFile}" chapters --simple "{extractPath}"'
+        subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        print(f'Extracting chapters to the file "{extractPath}".\nProgress: 100%')
+    elif len(jsonData.get('chapters')) == 0:
+        print(f'No chapters available in "{os.path.basename(mediaFile)}"')
+
+#run commands for extract attachments
+
+def runAttachments(mediaFile):
+    global i
+    commandList = []
+    get_output(mediaFile)
+    if len(jsonData.get('attachments')) > 0:
+        makeFolder(mediaFile)
+        viewAttachments(mediaFile)
+        attachmentID = input(f'\nattachmentID: ')
+        attachmentID = attachmentID.split(', ')
+        for i in attachmentID:
+            i = int(i) - 1
+            get_attachments(mediaFile)
+            extractPath = os.path.join(extractFolder, attach_name)
+            extractParam = f'{attach_id}:"{extractPath}"'
+            commandList.append(extractParam)
+        extractParam = ' '.join(commandList)
+        command = f'mkvextract "{mediaFile}" attachments {extractParam}'
         process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print(process.stdout.decode())
-        print(" ")
+        print('\n' + process.stdout.decode())
+    elif len(jsonData.get('attachments')) == 0:
+        print(f'No attachments available in "{os.path.basename(mediaFile)}"')
 
-def extract_all_tracks():
-    global i
-    global mkv_file
-    if input_count >= 2:
-        if os.path.isfile(sys.argv[1]) is False:
-            process_dir_all_tracks()
-        else:
-            for mkv_file_id in range(1, input_count):
-                folder_name = os.path.dirname(os.path.abspath(sys.argv[int(mkv_file_id)]))
-                mkv_file = sys.argv[int(mkv_file_id)]
-                folder, file = os.path.split(mkv_file)
-                file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name, file_name)
-                mkv_file_list.append(mkv_file)
-                os.makedirs(extract_folder, exist_ok=True)
-                load_json_out()            
-                track_count = len(json_data['tracks'])
-                extract_track_command = []
-                for i in range(track_count):
-                    load_json_data()
-                    process_mkv_file()
-                    join_param = os.path.join(extract_folder, extract_track_name)
-                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-                    extract_track_command.append(extract_track_param)
-                    extract_param_option = ' '.join(extract_track_command)
-                command = (f'mkvextract "{os.path.abspath(mkv_file)}" tracks {extract_param_option}')
-                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                print(process.stdout.decode())
-                print(" ")
-    else:
-        print("Add mkv file path or folder path")
+#run commands for extract timestamps for all tracks
 
-def process_dir_single_tracks():
+def runTimestamps(mediaFile):
     global i
-    global mkv_file
-    for mkv_file_in in os.listdir(sys.argv[1]):
-        if str(mkv_file_in[-3:]).lower() == "mkv":
-            mkv_file_list.append(mkv_file_in)
-    os.chdir(sys.argv[1])
-    for mkv_file in mkv_file_list:
-        folder_name = os.path.dirname(os.path.abspath(mkv_file))
-        file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name, file_name)
-        os.makedirs(extract_folder, exist_ok=True)
-        list_tracks()
-        track_in = input("|--Enter Track ID: ")
-        print(" ")
-        track_in_list = track_in.split(", ")
-        extract_track_command = []
-        for i in track_in_list:
-            load_json_data()
-            process_mkv_file()
-            join_param = os.path.join(extract_folder, extract_track_name)
-            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-            extract_track_command.append(extract_track_param)
-            extract_param_option = ' '.join(extract_track_command)
-        command = (f'mkvextract "{os.path.abspath(mkv_file)}" tracks {extract_param_option}')
+    commandList = []
+    makeFolder(mediaFile)
+    get_output(mediaFile)
+    trackCount = len(jsonData['tracks'])
+    for i in range(trackCount):
+        get_tracks(mediaFile)
+        extractName = f'TrackID_{id}_[{track_type}]_[tc].txt'
+        extractPath = os.path.join(extractFolder, extractName)
+        extractParam = f'{id}:"{extractPath}"'
+        commandList.append(extractParam)
+    extractParam = ' '.join(commandList)
+    command = f'mkvextract "{mediaFile}" timecodes_v2 {extractParam}'
+    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    print(process.stdout.decode())
+
+#run commands for extract cues for all tracks
+
+def runCues(mediaFile):
+    global i
+    commandList = []
+    makeFolder(mediaFile)
+    get_output(mediaFile)
+    trackCount = len(jsonData['tracks'])
+    for i in range(trackCount):
+        get_tracks(mediaFile)
+        extractName = f'TrackID_{id}_[{track_type}]_[cues].txt'
+        extractPath = os.path.join(extractFolder, extractName)
+        extractParam = f'{id}:"{extractPath}"'
+        commandList.append(extractParam)
+    extractParam = ' '.join(commandList)
+    command = f'mkvextract "{mediaFile}" cues {extractParam}'
+    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    print(process.stdout.decode())
+
+#run commands for extract cue sheet
+
+def runCueSheet(mediaFile):
+    makeFolder(mediaFile)
+    extractPath = os.path.join(extractFolder, 'Cue_Sheet.cue')
+    command = f'mkvextract "{mediaFile}" cuesheet "{extractPath}"'
+    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    print(process.stdout.decode())
+
+#run commands for extract tags
+
+def runTags(mediaFile):
+    makeFolder(mediaFile)
+    get_output(mediaFile)
+    if (len(jsonData.get('global_tags')) > 0) or (len(jsonData.get('track_tags')) > 0):
+        extractPath = os.path.join(extractFolder, 'Tags.xml')
+        command = f'mkvextract "{mediaFile}" tags "{extractPath}"'
         process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print(process.stdout.decode())
-        print(" ")
+        print(f'Extracting tags to the file "{extractPath}".\nProgress: 100%')
+    elif (len(jsonData.get('global_tags')) == 0) and (len(jsonData.get('track_tags')) == 0):
+        print(f'No tags available in "{os.path.basename(mediaFile)}"')
 
-def extract_single_track():
-    global i
-    global mkv_file
-    if input_count >= 2:
-        if os.path.isfile(sys.argv[1]) is False:
-            process_dir_single_tracks()
-        else:
-            for mkv_file_id in range(1, input_count):
-                folder_name = os.path.dirname(os.path.abspath(sys.argv[int(mkv_file_id)]))
-                mkv_file = sys.argv[int(mkv_file_id)]
-                folder, file = os.path.split(mkv_file)
-                file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name, file_name)
-                mkv_file_list.append(mkv_file)
-                os.makedirs(extract_folder, exist_ok=True)
-                extract_track_command = []
-                list_tracks()
-                track_in = input("|--Enter Track ID: ")
-                print(" ")
-                track_in_list = track_in.split(", ")
-                for i in track_in_list:
-                    load_json_data()
-                    process_mkv_file()
-                    join_param = os.path.join(extract_folder, extract_track_name)
-                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-                    extract_track_command.append(extract_track_param)
-                    extract_param_option = ' '.join(extract_track_command)
-                command = (f'mkvextract "{os.path.abspath(mkv_file)}" tracks {extract_param_option}')
-                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                print(process.stdout.decode())
-                print(" ")
-    else:
-        print("Add mkv file path or folder path")
+#main screen for running the script
 
-def process_dir_chapters():
-    global i
-    global mkv_file
-    global chapters_mode
-    for mkv_file_in in os.listdir(sys.argv[1]):
-        if str(mkv_file_in[-3:]).lower() == "mkv":
-            mkv_file_list.append(mkv_file_in)
-    os.chdir(sys.argv[1])
-    for mkv_file in mkv_file_list:
-        load_json_out()
-        if len(json_data.get("chapters")) > 0:
-            folder_name = os.path.dirname(os.path.abspath(mkv_file))
-            file_name = mkv_file[0:len(mkv_file) - 4]
-            extract_folder = os.path.join(folder_name, file_name)
-            os.makedirs(extract_folder, exist_ok=True)
-            if chapters_mode == 1:
-                join_param = os.path.join(extract_folder, "Chapters.xml")
-                extract_track_param = (f'"{str(join_param)}"')
-                command = (f'mkvextract "{os.path.abspath(mkv_file)}" chapters {extract_track_param}')
-            elif chapters_mode == 2:
-                join_param = os.path.join(extract_folder, "Chapters_OGM.txt")
-                extract_track_param = (f'"{str(join_param)}"')
-                command = (f'mkvextract "{os.path.abspath(mkv_file)}" chapters --simple {extract_track_param}')
-            process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            print(process.stdout.decode())
-            print("Chapters Saved.")
-            print(" ")
-        elif len(json_data.get("chapters")) == 0:
-            print("No Chapters.")
-            print(" ")
+def main():
+    inputProcess()
+    mediaList = mkvList + webmList
+    mediaList = sorted(mediaList)
 
-def extract_chapters():
-    global i
-    global mkv_file
-    if input_count >= 2:
-        if os.path.isfile(sys.argv[1]) is False:
-            process_dir_chapters()
-        else:
-            for mkv_file_id in range(1, input_count):
-                folder_name = os.path.dirname(os.path.abspath(sys.argv[int(mkv_file_id)]))
-                mkv_file = sys.argv[int(mkv_file_id)]
-                folder, file = os.path.split(mkv_file)
-                file_name = file[0:len(file) - 4]
-                load_json_out()
-                if len(json_data.get("chapters")) > 0:
-                    extract_folder = os.path.join(folder_name, file_name)
-                    mkv_file_list.append(mkv_file)
-                    os.makedirs(extract_folder, exist_ok=True)
-                    if chapters_mode == 1:
-                        join_param = os.path.join(extract_folder, "Chapters.xml")
-                        extract_track_param = (f'"{str(join_param)}"')
-                        command = (f'mkvextract "{os.path.abspath(mkv_file)}" chapters {extract_track_param}')
-                    elif chapters_mode == 2:
-                        join_param = os.path.join(extract_folder, "Chapters_OGM.txt")
-                        extract_track_param = (f'"{str(join_param)}"')
-                        command = (f'mkvextract "{os.path.abspath(mkv_file)}" chapters --simple {extract_track_param}')
-                    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                    print(process.stdout.decode())
-                    print("Chapters Saved.")
-                    print(" ")
-                elif len(json_data.get("chapters")) == 0:
-                    print("No Chapters.")
-                    print(" ")
-    else:
-        print("Add mkv file path or folder path")
+    extractMode = int(input(
+        f'\nmkvextractor (MKVToolNix : mkvextract)\
+        \n|\
+        \n|-- 1 : Extract All Tracks\
+        \n|-- 2 : Extract Single Tracks\
+        \n|-- 3 : Extract Chapters\
+        \n|-- 4 : Extract Attachments\
+        \n|-- 5 : Extract Timestamps\
+        \n|-- 6 : Extract Cues\
+        \n|-- 7 : Extract Cue Sheet\
+        \n|-- 8 : Extract Tags\
+        \n\
+        \nextractMode: '
+    ))
+    
+    print(' ')
 
-def process_dir_attachments():
-    global i
-    global mkv_file
-    global attachments_mode
-    global attachments_file_name
-    for mkv_file_in in os.listdir(sys.argv[1]):
-        if str(mkv_file_in[-3:]).lower() == "mkv":
-            mkv_file_list.append(mkv_file_in)
-    os.chdir(sys.argv[1])
-    for mkv_file in mkv_file_list:
-        load_json_out()
-        if len(json_data.get("attachments")) > 0:
-            folder_name = os.path.dirname(os.path.abspath(mkv_file))
-            file_name = mkv_file[0:len(mkv_file) - 4]
-            extract_folder = os.path.join(folder_name, file_name)
-            os.makedirs(extract_folder, exist_ok=True)
-            if attachments_mode == 1:
-                print(" ")
-                attachment_count = len(json_data['attachments'])
-                extract_track_command = []
-                for i in range(attachment_count):
-                    load_json_data_attachments()
-                    join_param = os.path.join(extract_folder, attachments_file_name)
-                    extract_track_param = (f'{str(attachments_id)}:"{str(join_param)}"')
-                    extract_track_command.append(extract_track_param)
-                    extract_param_option = ' '.join(extract_track_command)
-                    command = (f'mkvextract "{os.path.abspath(mkv_file)}" attachments {extract_param_option}')
-                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                print(process.stdout.decode())
-                print("Attachments Saved.")
-            elif attachments_mode == 2:
-                list_attachments()
-                choose_attach_id = input("|--Enter Attachment ID: ")
-                print(" ")
-                i = int(choose_attach_id) - 1
-                attachments_file_name = json_data.get('attachments')[int(i)].get('file_name')
-                join_param = os.path.join(extract_folder, attachments_file_name)
-                extract_track_param = (f'{str(choose_attach_id)}:"{str(join_param)}"')
-                command = (f'mkvextract "{os.path.abspath(mkv_file)}" attachments {extract_track_param}')
-                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                print(process.stdout.decode())
-                print("Attachments Saved.")
-                print(" ")
-        elif len(json_data.get("attachments")) == 0:
-            print("No Attachments.")
-            print(" ")
+    if extractMode == 1:
+        for file in mediaList: runTracks(file)
+    elif extractMode == 2:
+        for file in mediaList: runTrack(file)
+    elif extractMode == 3:
+        global chaptersMode
+        chaptersMode = int(input(
+            f'1 : XML Chapters\
+            \n2 : OGM Chapters\
+            \n\nchaptersMode: '))
+        print(' ')
+        for file in mediaList: runChapters(file)
+    elif extractMode == 4:
+        for file in mediaList: runAttachments(file)
+    elif extractMode == 5:
+        for file in mediaList: runTimestamps(file)
+    elif extractMode == 6:
+        for file in mediaList: runCues(file)
+    elif extractMode == 7:
+        for file in mediaList: runCueSheet(file)
+    elif extractMode == 8:
+        for file in mediaList: runTags(file)
 
-def extract_attachments():
-    global i
-    global mkv_file
-    global attachments_id
-    global attachments_file_name
-    if input_count >= 2:
-        if os.path.isfile(sys.argv[1]) is False:
-            process_dir_attachments()
-        else:
-            for mkv_file_id in range(1, input_count):
-                folder_name = os.path.dirname(os.path.abspath(sys.argv[int(mkv_file_id)]))
-                mkv_file = sys.argv[int(mkv_file_id)]
-                folder, file = os.path.split(mkv_file)
-                file_name = file[0:len(file) - 4]
-                load_json_out()
-                if len(json_data.get("attachments")) > 0:
-                    extract_folder = os.path.join(folder_name, file_name)
-                    mkv_file_list.append(mkv_file)
-                    os.makedirs(extract_folder, exist_ok=True)
-                    if attachments_mode == 1:
-                        print(" ")
-                        attachment_count = len(json_data['attachments'])
-                        extract_track_command = []
-                        for i in range(attachment_count):
-                            load_json_data_attachments()
-                            join_param = os.path.join(extract_folder, attachments_file_name)
-                            extract_track_param = (f'{str(attachments_id)}:"{str(join_param)}"')
-                            extract_track_command.append(extract_track_param)
-                            extract_param_option = ' '.join(extract_track_command)
-                            command = (f'mkvextract "{os.path.abspath(mkv_file)}" attachments {extract_param_option}')
-                        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                        print(process.stdout.decode())
-                        print("Attachments Saved.")
-                    elif attachments_mode == 2:
-                        list_attachments()
-                        choose_attach_id = input("|--Enter Attachment ID: ")
-                        print(" ")
-                        i = int(choose_attach_id) - 1
-                        attachments_file_name = json_data.get('attachments')[int(i)].get('file_name')
-                        join_param = os.path.join(extract_folder, attachments_file_name)
-                        extract_track_param = (f'{str(choose_attach_id)}:"{str(join_param)}"')
-                        command = (f'mkvextract "{os.path.abspath(mkv_file)}" attachments {extract_track_param}')
-                        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                        print(process.stdout.decode())
-                        print("Attachments Saved.")
-                        print(" ")
-                elif len(json_data.get("attachments")) == 0:
-                    print("No Attachments.")
-                    print(" ")
-    else:
-        print("Add mkv file path or folder path")
+#run script
 
-def process_dir_all_tracks_timestamps():
-    global i
-    global id
-    global mkv_file
-    global track_type
-    for mkv_file_in in os.listdir(sys.argv[1]):
-        if str(mkv_file_in[-3:]).lower() == "mkv":
-            mkv_file_list.append(mkv_file_in)
-    os.chdir(sys.argv[1])
-    for mkv_file in mkv_file_list:
-        folder_name = os.path.dirname(os.path.abspath(mkv_file))
-        file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name, file_name)
-        os.makedirs(extract_folder, exist_ok=True)
-        load_json_out()            
-        track_count = len(json_data['tracks'])
-        extract_track_command = []
-        for i in range(track_count):
-            load_json_data()
-            extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
-            join_param = os.path.join(extract_folder, extract_track_name)
-            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-            extract_track_command.append(extract_track_param)
-            extract_param_option = ' '.join(extract_track_command)
-        command = (f'mkvextract "{os.path.abspath(mkv_file)}" timecodes_v2 {extract_param_option}')
-        print(" ")
-        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print(process.stdout.decode())
-
-def extract_all_tracks_timestamps():
-    global i
-    global mkv_file
-    if input_count >= 2:
-        if os.path.isfile(sys.argv[1]) is False:
-            process_dir_all_tracks_timestamps()
-        else:
-            for mkv_file_id in range(1, input_count):
-                folder_name = os.path.dirname(os.path.abspath(sys.argv[int(mkv_file_id)]))
-                mkv_file = sys.argv[int(mkv_file_id)]
-                folder, file = os.path.split(mkv_file)
-                file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name, file_name)
-                mkv_file_list.append(mkv_file)
-                os.makedirs(extract_folder, exist_ok=True)
-                load_json_out()            
-                track_count = len(json_data['tracks'])
-                extract_track_command = []
-                for i in range(track_count):
-                    load_json_data()
-                    extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
-                    join_param = os.path.join(extract_folder, extract_track_name)
-                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-                    extract_track_command.append(extract_track_param)
-                    extract_param_option = ' '.join(extract_track_command)
-                command = (f'mkvextract "{os.path.abspath(mkv_file)}" timecodes_v2 {extract_param_option}')
-                print(" ")
-                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                print(process.stdout.decode())
-    else:
-        print("Add mkv file path or folder path")
-
-def process_dir_single_tracks_timestamps():
-    global i
-    global mkv_file
-    for mkv_file_in in os.listdir(sys.argv[1]):
-        if str(mkv_file_in[-3:]).lower() == "mkv":
-            mkv_file_list.append(mkv_file_in)
-    os.chdir(sys.argv[1])
-    for mkv_file in mkv_file_list:
-        folder_name = os.path.dirname(os.path.abspath(mkv_file))
-        file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name, file_name)
-        os.makedirs(extract_folder, exist_ok=True)
-        list_tracks()
-        track_in = input("|--Enter Track ID: ")
-        track_in_list = track_in.split(", ")
-        extract_track_command = []
-        for i in track_in_list:
-            load_json_data()                
-            extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
-            join_param = os.path.join(extract_folder, extract_track_name)
-            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-            extract_track_command.append(extract_track_param)
-            extract_param_option = ' '.join(extract_track_command)
-        command = (f'mkvextract "{os.path.abspath(mkv_file)}" timecodes_v2 {extract_param_option}')
-        print(" ")
-        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print(process.stdout.decode())
-
-def extract_single_track_timestamps():
-    global i
-    global mkv_file
-    if input_count >= 2:
-        if os.path.isfile(sys.argv[1]) is False:
-            process_dir_single_tracks_timestamps()
-        else:
-            for mkv_file_id in range(1, input_count):
-                folder_name = os.path.dirname(os.path.abspath(sys.argv[int(mkv_file_id)]))
-                mkv_file = sys.argv[int(mkv_file_id)]
-                folder, file = os.path.split(mkv_file)
-                file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name, file_name)
-                mkv_file_list.append(mkv_file)
-                os.makedirs(extract_folder, exist_ok=True)
-                extract_track_command = []
-                list_tracks()
-                track_in = input("|--Enter Track ID: ")
-                track_in_list = track_in.split(", ")
-                for i in track_in_list:
-                    load_json_data()
-                    extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_tc.txt"
-                    join_param = os.path.join(extract_folder, extract_track_name)
-                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-                    extract_track_command.append(extract_track_param)
-                    extract_param_option = ' '.join(extract_track_command)
-                command = (f'mkvextract "{os.path.abspath(mkv_file)}" timecodes_v2 {extract_param_option}')
-                print(" ")
-                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                print(process.stdout.decode())
-
-def process_dir_all_tracks_cue():
-    global i
-    global id
-    global mkv_file
-    global track_type
-    for mkv_file_in in os.listdir(sys.argv[1]):
-        if str(mkv_file_in[-3:]).lower() == "mkv":
-            mkv_file_list.append(mkv_file_in)
-    os.chdir(sys.argv[1])
-    for mkv_file in mkv_file_list:
-        folder_name = os.path.dirname(os.path.abspath(mkv_file))
-        file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name, file_name)
-        os.makedirs(extract_folder, exist_ok=True)
-        load_json_out()            
-        track_count = len(json_data['tracks'])
-        extract_track_command = []
-        for i in range(track_count):
-            load_json_data()
-            extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
-            join_param = os.path.join(extract_folder, extract_track_name)
-            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-            extract_track_command.append(extract_track_param)
-            extract_param_option = ' '.join(extract_track_command)
-        command = (f'mkvextract "{os.path.abspath(mkv_file)}" cues {extract_param_option}')
-        print(" ")
-        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print(process.stdout.decode())
-
-def extract_all_tracks_cue():
-    global i
-    global mkv_file
-    if input_count >= 2:
-        if os.path.isfile(sys.argv[1]) is False:
-            process_dir_all_tracks_cue()
-        else:
-            for mkv_file_id in range(1, input_count):
-                folder_name = os.path.dirname(os.path.abspath(sys.argv[int(mkv_file_id)]))
-                mkv_file = sys.argv[int(mkv_file_id)]
-                folder, file = os.path.split(mkv_file)
-                file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name, file_name)
-                mkv_file_list.append(mkv_file)
-                os.makedirs(extract_folder, exist_ok=True)
-                load_json_out()            
-                track_count = len(json_data['tracks'])
-                extract_track_command = []
-                for i in range(track_count):
-                    load_json_data()
-                    extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
-                    join_param = os.path.join(extract_folder, extract_track_name)
-                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-                    extract_track_command.append(extract_track_param)
-                    extract_param_option = ' '.join(extract_track_command)
-                command = (f'mkvextract "{os.path.abspath(mkv_file)}" cues {extract_param_option}')
-                print(" ")
-                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                print(process.stdout.decode())
-    else:
-        print("Add mkv file path or folder path")
-
-def process_dir_single_tracks_cue():
-    global i
-    global mkv_file
-    for mkv_file_in in os.listdir(sys.argv[1]):
-        if str(mkv_file_in[-3:]).lower() == "mkv":
-            mkv_file_list.append(mkv_file_in)
-    os.chdir(sys.argv[1])
-    for mkv_file in mkv_file_list:
-        folder_name = os.path.dirname(os.path.abspath(mkv_file))
-        file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name, file_name)
-        os.makedirs(extract_folder, exist_ok=True)
-        list_tracks()
-        track_in = input("|--Enter Track ID: ")
-        track_in_list = track_in.split(", ")
-        extract_track_command = []
-        for i in track_in_list:
-            load_json_data()                
-            extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
-            join_param = os.path.join(extract_folder, extract_track_name)
-            extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-            extract_track_command.append(extract_track_param)
-            extract_param_option = ' '.join(extract_track_command)
-        command = (f'mkvextract "{os.path.abspath(mkv_file)}" cues {extract_param_option}')
-        print(" ")
-        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print(process.stdout.decode())
-        print(" ")
-
-def extract_single_track_cue():
-    global i
-    global mkv_file
-    if input_count >= 2:
-        if os.path.isfile(sys.argv[1]) is False:
-            process_dir_single_tracks_cue()
-        else:
-            for mkv_file_id in range(1, input_count):
-                folder_name = os.path.dirname(os.path.abspath(sys.argv[int(mkv_file_id)]))
-                mkv_file = sys.argv[int(mkv_file_id)]
-                folder, file = os.path.split(mkv_file)
-                file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name, file_name)
-                mkv_file_list.append(mkv_file)
-                os.makedirs(extract_folder, exist_ok=True)
-                extract_track_command = []
-                list_tracks()
-                track_in = input("|--Enter Track ID: ")
-                track_in_list = track_in.split(", ")
-                for i in track_in_list:
-                    load_json_data()
-                    extract_track_name = "Track_" + str(id) + "_[" + str(track_type) + "]_cues.txt"
-                    join_param = os.path.join(extract_folder, extract_track_name)
-                    extract_track_param = (f'{str(id)}:"{str(join_param)}"')
-                    extract_track_command.append(extract_track_param)
-                    extract_param_option = ' '.join(extract_track_command)
-                command = (f'mkvextract "{os.path.abspath(mkv_file)}" cues {extract_param_option}')
-                print(" ")
-                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                print(process.stdout.decode())
-                print(" ")
-
-def process_dir_cue_sheet():
-    global i
-    global mkv_file
-    global chapters_mode
-    for mkv_file_in in os.listdir(sys.argv[1]):
-        if str(mkv_file_in[-3:]).lower() == "mkv":
-            mkv_file_list.append(mkv_file_in)
-    os.chdir(sys.argv[1])
-    for mkv_file in mkv_file_list:
-        folder_name = os.path.dirname(os.path.abspath(mkv_file))
-        file_name = mkv_file[0:len(mkv_file) - 4]
-        extract_folder = os.path.join(folder_name, file_name)
-        os.makedirs(extract_folder, exist_ok=True)
-        join_param = os.path.join(extract_folder, "cue_sheet.cue")
-        extract_track_param = (f'"{str(join_param)}"')
-        command = (f'mkvextract "{os.path.abspath(mkv_file)}" cuesheet {extract_track_param}')
-        process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        print(process.stdout.decode())
-
-def extract_cue_sheet():
-    global i
-    global mkv_file
-    if input_count >= 2:
-        if os.path.isfile(sys.argv[1]) is False:
-            process_dir_cue_sheet()
-        else:
-            for mkv_file_id in range(1, input_count):
-                folder_name = os.path.dirname(os.path.abspath(sys.argv[int(mkv_file_id)]))
-                mkv_file = sys.argv[int(mkv_file_id)]
-                folder, file = os.path.split(mkv_file)
-                file_name = file[0:len(file) - 4]
-                extract_folder = os.path.join(folder_name, file_name)
-                mkv_file_list.append(mkv_file)
-                os.makedirs(extract_folder, exist_ok=True)
-                join_param = os.path.join(extract_folder, "cue_sheet.cue")
-                extract_track_param = (f'"{str(join_param)}"')
-                command = (f'mkvextract "{os.path.abspath(mkv_file)}" cuesheet {extract_track_param}')
-                process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                print(process.stdout.decode())
-    else:
-        print("Add mkv file path or folder path")
-
-def process_dir_tags():
-    global i
-    global mkv_file
-    for mkv_file_in in os.listdir(sys.argv[1]):
-        if str(mkv_file_in[-3:]).lower() == "mkv":
-            mkv_file_list.append(mkv_file_in)
-    os.chdir(sys.argv[1])
-    for mkv_file in mkv_file_list:
-        load_json_out()
-        if len(json_data.get("global_tags")) or len(json_data.get("track_tags")) > 0:
-            folder_name = os.path.dirname(os.path.abspath(mkv_file))
-            file_name = mkv_file[0:len(mkv_file) - 4]
-            extract_folder = os.path.join(folder_name, file_name)
-            os.makedirs(extract_folder, exist_ok=True)
-            join_param = os.path.join(extract_folder, "Tags.xml")
-            extract_track_param = (f'"{str(join_param)}"')
-            command = (f'mkvextract "{os.path.abspath(mkv_file)}" tags {extract_track_param}')
-            process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            print(process.stdout.decode())
-            print(" ")
-            print("Tags Saved.")
-        elif len(json_data.get("global_tags")) == 0:
-            if len(json_data.get("track_tags")) == 0:
-                print(" ")
-                print("No Tags.")
-
-def extract_tags():
-    global i
-    global mkv_file
-    if input_count >= 2:
-        if os.path.isfile(sys.argv[1]) is False:
-            process_dir_tags()
-        else:
-            for mkv_file_id in range(1, input_count):
-                folder_name = os.path.dirname(os.path.abspath(sys.argv[int(mkv_file_id)]))
-                mkv_file = sys.argv[int(mkv_file_id)]
-                folder, file = os.path.split(mkv_file)
-                file_name = file[0:len(file) - 4]
-                load_json_out()
-                if len(json_data.get("global_tags")) or len(json_data.get("track_tags")) > 0:
-                    extract_folder = os.path.join(folder_name, file_name)
-                    mkv_file_list.append(mkv_file)
-                    os.makedirs(extract_folder, exist_ok=True)
-                    join_param = os.path.join(extract_folder, "Tags.xml")
-                    extract_track_param = (f'"{str(join_param)}"')
-                    command = (f'mkvextract "{os.path.abspath(mkv_file)}" tags {extract_track_param}')
-                    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-                    print(process.stdout.decode())
-                    print(" ")
-                    print("Tags Saved.")
-                elif len(json_data.get("global_tags")) == 0:
-                    if len(json_data.get("track_tags")) == 0:
-                        print(" ")
-                        print("No Tags.")
-    else:
-        print("Add mkv file path or folder path")
-
-print("mkvextractor (MKVToolNix : mkvextract)")
-print("|")
-print("|-- 1 : Extract All Traks")
-print("|-- 2 : Extract Single Tracks")
-print("|-- 3 : Extract Chapters")
-print("|-- 4 : Extract Attachments")
-print("|-- 5 : Extract Timestamps")
-print("|-- 6 : Extract Cues")
-print("|-- 7 : Extract Cue Sheet")
-print("|-- 8 : Extract Tags")
-extract_mode = int(input("|--Extract Mode: "))
-
-if extract_mode == 1:
-    print(" ")
-    extract_all_tracks()
-elif extract_mode == 2:
-    extract_single_track()
-elif extract_mode == 3:
-    print("|")
-    print("|-- 1 : XML")
-    print("|-- 2 : OGM")
-    chapters_mode = int(input("|--Chapters Mode: "))
-    print(" ")
-    extract_chapters()
-elif extract_mode == 4:
-    print("|")
-    print("|-- 1 : All Attachments")
-    print("|-- 2 : Select Attachment")
-    attachments_mode = int(input("|--Attachments Mode: "))
-    extract_attachments()
-elif extract_mode == 5:
-    print("|")
-    print("|-- 1 : Timestamps from all Tracks")
-    print("|-- 2 : Timestamps from a Single Track")
-    timestamps_mode = int(input("|--Timestamps Mode: "))
-    if timestamps_mode == 1:
-        extract_all_tracks_timestamps()
-    elif timestamps_mode == 2:
-        extract_single_track_timestamps()
-elif extract_mode == 6:
-    print("|")
-    print("|-- 1 : Cues from all Tracks")
-    print("|-- 2 : Cues from a Single Track")
-    cues_mode = int(input("|--Cues Mode: "))
-    if cues_mode == 1:
-        extract_all_tracks_cue()
-    elif cues_mode == 2:
-        extract_single_track_cue()
-elif extract_mode == 7:
-    print(" ")
-    extract_cue_sheet()
-elif extract_mode == 8:
-    extract_tags()
+if __name__ == "__main__":
+    main()
